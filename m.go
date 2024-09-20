@@ -5,6 +5,7 @@ import (
   "reflect"
   "encoding/json"
   "math"
+  "errors"
 )
 
 const INT64_MIN int64= -9223372036854775808
@@ -141,6 +142,42 @@ func (m M) MkM(k ... string) M {
   return m[k[0]].(M).MkM(k[1:]...)
 }
 
+func AnyToInt64(val interface{}) (int64, error) {
+  switch v := val.(type) {
+  case int64:
+    return int64(v), nil
+  case int:
+    return int64(v), nil
+  case int32:
+    return int64(v), nil
+  case int16:
+    return int64(v), nil
+  case int8:
+    return int64(v), nil
+  case uint64:
+    if uint64(v) > INT64_MAXu { return 0, errors.New("Too large") }
+    return int64(v), nil
+  case uint:
+    if uint64(v) > INT64_MAXu { return 0, errors.New("Too large") }
+    return int64(v), nil
+  case uint32:
+    if uint64(v) > INT64_MAXu { return 0, errors.New("Too large") }
+    return int64(v), nil
+  case uint16:
+    if uint64(v) > INT64_MAXu { return 0, errors.New("Too large") }
+    return int64(v), nil
+  case uint8:
+    if uint64(v) > INT64_MAXu { return 0, errors.New("Too large") }
+    return int64(v), nil
+  case string:
+    ret, err := strconv.ParseInt(v, 10, 64)
+    if err != nil { return 0, err }
+    return ret, nil
+  default:
+    return 0, errors.New("Unsupported type")
+  }
+}
+
 func (m M) Vi(k ... string) int64 {
   if len(k) == 0 { return INT64_ERR }
   if !m.e(k[0]) { return INT64_ERR }
@@ -149,43 +186,11 @@ func (m M) Vi(k ... string) int64 {
   case M:
     if len(k) == 1 { return INT64_ERR }
     return m[k[0]].(M).Vi(k[1:]...)
-  case int64:
+  default:
     if len(k) != 1 { return INT64_ERR }
-    return int64(v)
-  case int:
-    if len(k) != 1 { return INT64_ERR }
-    return int64(v)
-  case int32:
-    if len(k) != 1 { return INT64_ERR }
-    return int64(v)
-  case int16:
-    if len(k) != 1 { return INT64_ERR }
-    return int64(v)
-  case int8:
-    if len(k) != 1 { return INT64_ERR }
-    return int64(v)
-  case uint64:
-    if len(k) != 1 || uint64(v) > INT64_MAXu { return INT64_ERR }
-    return int64(v)
-  case uint:
-    if len(k) != 1 || uint64(v) > INT64_MAXu { return INT64_ERR }
-    return int64(v)
-  case uint32:
-    if len(k) != 1 || uint64(v) > INT64_MAXu { return INT64_ERR }
-    return int64(v)
-  case uint16:
-    if len(k) != 1 || uint64(v) > INT64_MAXu { return INT64_ERR }
-    return int64(v)
-  case uint8:
-    if len(k) != 1 || uint64(v) > INT64_MAXu { return INT64_ERR }
-    return int64(v)
-  case string:
-    if len(k) != 1 { return INT64_ERR }
-    ret, err := strconv.ParseInt(v, 10, 64)
+    ret, err := AnyToInt64(v)
     if err != nil { return INT64_ERR }
     return ret
-  default:
-    return INT64_ERR
   }
 }
 
