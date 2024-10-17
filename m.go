@@ -646,7 +646,7 @@ func (m M) AnyString(k string) (string, bool) {
   return "", false
 }
 
-func (m M) Keys() ([]string) {
+func (m M) Keys() []string {
   ret := make([]string, len(m))
   i := 0
   for k, _ := range m {
